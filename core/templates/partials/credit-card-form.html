@@ -1,0 +1,38 @@
+{# NewCreditCardForm - Add or Pay with a new credit card #}
+        <div id="new-credit-card-form" class="bg-gray-100 rounded-2xl shadow p-4" >
+            <form id="newccform" style="display:inine;">
+                <span class="block text-sm font-medium text-gray-700">Number:</span><input
+                    type="text"
+                    min="16"
+                    max="16"
+                    class="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-number"
+                    id="cc-number"
+                    required
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">Expiry:</span><input
+                    type="text"
+                    min="5"
+                    max="5"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-expiration"
+                    required
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">CVC:</span><input
+                    type="text"
+                    min="5"
+                    max="5"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-cvc"
+                    required
+                /><br>
+                    <span class="block text-sm font-medium text-gray-700">Holder name:</span><input
+                    type="text"
+                    min="0"
+                    max="30"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-holder"
+                    
+                />
+            </form>
+        </div>

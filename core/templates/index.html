@@ -2,6 +2,50 @@
 
 {% block content %}
 
-Hello
+<h1 class="text-xl font-bold text-gray-1000"> Marcaria Payment Widget </h1>
+<br>
+        <div id="new-credit-card-form" class="bg-gray-100 rounded-2xl shadow p-4" >
+            <h3 class="block text-sm font-medium font-bold text-gray-700 text-center">Order to pay</h3>
+                <span class="block text-sm font-medium text-gray-700">OrderID:</span><input
+                    type="text"
+                    min="16"
+                    max="16"
+                    class="mt-1 block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="order"
+                    id="order"
+                    required
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">Amount:</span><input
+                    type="text"
+                    min="5"
+                    max="5"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="amount"
+                    id="amount"
+                    required
+                /><br>
+        </div>
+<br>
+
+
+<div id="credit-card" x-data = "{newcc:false,selected:false,step1:false,step2:false,step3:false,step4:false}" >
+<span x-show="!newcc"><h2 class="text-xl font-bold text-gray-800">Credit Card Selector</h2> </span>
+<span x-show="newcc"><h2 class="text-xl font-bold text-gray-800">New Credit Card</h2> </span>
+<br>
+    <span x-show="!newcc">
+        {% include 'partials/credit-card-list.html' %}
+    </span>
+    <span x-show="newcc & !step1"  >
+        {% include 'partials/credit-card-form.html' %}
+    </span>
+    <span x-show="step1">
+        {% include 'partials/credit-card-step-1.html' %}
+    </span>
+<br>
+<button @click="newcc = true" x-show="!newcc" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" >New Credit Card</button>
+<button x-show="selected | newcc" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"  @click="step1 = true" onclick="step1();" >Pay</button>
+<button @click="newcc=false" x-show="newcc" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Go Back</button>
+</div>
+
 
 {% endblock %}

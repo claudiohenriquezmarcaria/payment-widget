@@ -1,0 +1,8 @@
+
+<div id="credit-card-list" class="bg-white rounded-2xl shadow p-4" >
+    {% for cc in CreditCardsAPI %}
+        <div  id="credit-card-container" class="p-3 bg-gray-100 rounded">
+            <span @click="selected = true" class="text-gray-600">{{ cc.creditCardNumber }} - {{cc.ownerName}}</span>
+        </div>
+    {% endfor %}
+</div>

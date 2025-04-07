@@ -1,0 +1,62 @@
+            <iframe name='collectionFrame' id='collectionFrame'  height="400" width="400" style="display:none;" ></iframe> 
+            <form id="collectionForm" target='collectionFrame' name="devicedata" method="post" action="https://centinelapistag.cardinalcommerce.com/V2/Cruise/Collect" > 
+                <input type="hidden"  name="Bin" id="Bin" value="" /> 
+                <input type="hidden"  name="JWT" id="JWT" value="" /> 
+            </form>
+
+            <form id="step1Response"  name="step1Response" > 
+                <input type="hidden"  name="sid" id="sid" value="" /> 
+                <input type="hidden"  name="tid" id="tid" value="" /> 
+            </form>  
+
+            <script>
+                function step1() {
+                    // Prepare data to be sent in the request body
+                    const data = {
+                        creditCardNumber: $('#cc-number').val(),
+                        amount: $('#amount').val(),
+                        referenceOrderNumber: $('#order').val()
+                    };
+
+                    
+                    $.ajax({
+                        url: 'https://api-marcariacore-qa.marcaria.host/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step1/JWTInitialization',  // Replace with your API URL
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', // Ensure Content-Type is set to JSON
+                        },
+                        dataType: 'json',
+                        data: JSON.stringify(data), // Stringify the data to send it as JSON
+                        success: function (response) {
+                            console.log('Success:', response);
+                            var ddcForm = $('#collectionForm');
+                            $('#Bin').val(response.binAux);
+                            $('#JWT').val(response.token);
+                            ddcForm.submit();
+                            var iframe = document.getElementById('collectionFrame');
+                            window.addEventListener('message',ddcvalidationListener);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                }
+
+                function ddcvalidationListener(event) { 
+                    console.log("Message received from the child: " + event.data); // Message received from child 
+                    if (event.data != "Error" && event.origin == "https://api.marcaria.com") { 
+                        document.getElementById('sid').value = event.data; 
+                        document.getElementById('tid').value = ""; 
+                        console.log("Event origin: " + event.origin); 
+                        proceedWithCardinalLookup(); 
+                    } 
+                } 
+
+                function proceedWithCardinalLookup(){
+                    console.log("Initiating Cardinal Lookup Step 2");
+
+                }
+
+
+            </script>
