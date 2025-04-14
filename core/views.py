@@ -27,21 +27,3 @@ def get_creditcards(logged_in_user):
     
     return creditCardsAPI
 
-def step1(request):
-    user = request.user  # You can use user info here
-    data_to_send = {
-        "user_email": user.email,
-        "value": request.POST.get("data"),
-    }
-
-    try:
-        api_response = requests.post(
-            "https://external-api.com/endpoint/",
-            json=data_to_send,
-            headers={"Authorization": "Bearer YOUR_API_TOKEN"}
-        )
-        api_response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        return api_response.json()
-
-    return api_response.json()

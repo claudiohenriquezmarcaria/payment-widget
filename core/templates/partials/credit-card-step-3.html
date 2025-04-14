@@ -1,0 +1,23 @@
+
+
+            <div id="iframeModal" class="modal">
+                <div class="modal-content">
+                <span class="close" id="closeModalBtn">&times;</span>
+                    <iFrame  name='stepupFrame' id='stepupFrame' height="700" width="450"></iFrame> 
+                </div>
+            </div>
+            <form id="stepupForm" name="stepupForm" target="stepupFrame" method="POST" action="https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp"> 
+                <input type="hidden" name="MD" id="MD2" value="" /> 
+                <input type="hidden" name="JWT" id="JWT2" value="" /> 
+            </form> 
+
+            <script>
+
+                const closeBtn = document.getElementById("closeModalBtn");
+
+                closeBtn.onclick = () => modal.style.display = "none";
+
+
+            </script>
+
+

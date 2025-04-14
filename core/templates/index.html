@@ -28,7 +28,7 @@
 <br>
 
 
-<div id="credit-card" x-data = "{newcc:false,selected:false,step1:false,step2:false,step3:false,step4:false}" >
+<div id="credit-card" x-data = "{newcc:false,selected:false,step1:false,step2:false,step3:false,step4:false,paymentProcess:false,success:false}" x-ref="credit-card">
 <span x-show="!newcc"><h2 class="text-xl font-bold text-gray-800">Credit Card Selector</h2> </span>
 <span x-show="newcc"><h2 class="text-xl font-bold text-gray-800">New Credit Card</h2> </span>
 <br>
@@ -41,11 +41,361 @@
     <span x-show="step1">
         {% include 'partials/credit-card-step-1.html' %}
     </span>
+    <span x-show="step3">
+        {% include 'partials/credit-card-step-3.html' %}
+    </span>
+    <span x-show="paymentProcess">
+        {% include 'partials/paymentProcess.html' %}
+    </span>
+    <span x-show="success">
+        {% include 'partials/success.html' %}
+    </span>
 <br>
 <button @click="newcc = true" x-show="!newcc" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition" >New Credit Card</button>
-<button x-show="selected | newcc" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"  @click="step1 = true" onclick="step1();" >Pay</button>
+<button x-show="selected | newcc" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"  @click="step1 = true;paymentProcess = true" onclick="step1();" >Pay</button>
 <button @click="newcc=false" x-show="newcc" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Go Back</button>
 </div>
 
+            <script>
+                function step1() {
+                    // Prepare data to be sent in the request body
+                    const data = {
+                        creditCardNumber: $('#cc-number').val(),
+                        amount: $('#amount').val(),
+                        referenceOrderNumber: $('#order').val()
+                    };
+
+                    
+                    $.ajax({
+                        url: 'https://api-marcariacore-qa.marcaria.host/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step1/JWTInitialization',  
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', 
+                        },
+                        dataType: 'json',
+                        data: JSON.stringify(data), 
+                        success: function (response) {
+                            console.log('Success:', response);
+                            var ddcForm = $('#collectionForm');
+                            $('#Bin').val(response.binAux);
+                            $('#JWT').val(response.token);
+                            ddcForm.submit();
+                            var iframe = document.getElementById('collectionFrame');
+                            window.addEventListener('message',ddcvalidationListener);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                }
+
+                function ddcvalidationListener(event) { 
+                    console.log("Message received from the child: " + event.data); // Message received from child 
+                    if (event.data != "Error" && event.origin == "https://api.marcaria.com") { 
+                        document.getElementById('sid').value = event.data; 
+                        document.getElementById('tid').value = ""; 
+                        console.log("Event origin: " + event.origin); 
+                        proceedWithCardinalLookup(); 
+                    } 
+                } 
+
+                function proceedWithCardinalLookup(){
+                    console.log("Initiating Cardinal Lookup Step 2");
+
+                    //Prepare data
+
+                    /*const data = {
+                        creditCardNumber: $('#cc-number').val(),
+                        amount: $('#amount').val(),
+                        referenceOrderNumber: $('#order').val()
+                    };*/
+
+                    console.log("Step 2 - Prepare Data");
+
+
+
+                    const BodyData = {
+                        creditCard:{
+                            OwnerName: $('#cc-holder').val(),
+                            CreditCardNumber: $('#cc-number').val(),
+                            MonthExpirationDate: $('#cc-expiration').val().split('/')[0],
+                            YearExpirationDate: "20" + $('#cc-expiration').val().split('/')[1],
+                            Cvv: $('#cc-cvv').val(),
+                            BillingAddress: {
+                                Street: $('#cc-address').val(),
+                                city: $('#cc-city').val(),
+                                StateProvince: $('#cc-state').val(),
+                                CountryIso:'CL',
+                                postalCode: $('#cc-postcode').val()
+                            },
+                            cardBrand: getCCBrand($('#cc-number').val()),
+                            isPrimaryCard: false
+                        },
+                        _3dsDetails: {
+                            browserHeader: navigator.userAgent, 
+                            browserJavaEnabled: navigator.javaEnabled() ? "true" : "false", 
+                            browserJavascriptEnabled: "true", 
+                            browserLanguage: navigator.language || navigator.userLanguage, 
+                            browserColorDepth: screen.colorDepth.toString(), 
+                            browserScreenHeight: screen.height.toString(), 
+                            browserScreenWidth: screen.width.toString(), 
+                            browserTimeZone: new Date().getTimezoneOffset().toString(), 
+                            amount: $('#amount').val(),
+                            UserIP: GetUserIP(),
+                            currencyID: 'USD',
+                            sessionID: $('#sid').val()
+                        }
+                    };
+
+
+                    console.log(BodyData); 
+
+
+                    //Step 2: Lookup request
+                    $.ajax({
+                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step2/lookup', 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', 
+                        },
+                        dataType: 'json',
+                        data: JSON.stringify(BodyData), // Stringify the data to send it as JSON
+                        success: function (response) {
+                            console.log('Success:', response);
+                            /*var ddcForm = $('#collectionForm');
+                            $('#Bin').val(response.binAux);
+                            $('#JWT').val(response.token);
+                            ddcForm.submit();
+                            var iframe = document.getElementById('collectionFrame');
+                            window.addEventListener('message',ddcvalidationListener);*/
+                            
+                            var requireChallenge = response.requireChallenge;
+
+                            if(requireChallenge == false){
+                                var threeDSRequestId = response.threeDSRequestId;
+                                purchaseNewCC(threeDSRequestId);
+                            }
+                            else{
+                                /*
+                                {
+                                    "requireChallenge": true,
+                                    "nextStepParameters": {
+                                        "referenceId": "ref_456",
+                                        "transactionId": "txn_789",
+                                        "payload": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                                        "acsUrl": "https://acs.bank.com/challenge"
+                                    }
+                                    }
+                                
+                                */
+
+
+                                var acsUrl = response.nextStepParameters.acsUrl;
+                                var payload = response.nextStepParameters.payload;
+                                var referenceId = response.nextStepParameters.referenceId;
+                                var transactionId = response.nextStepParameters.transactionId;
+                                proceedWithCardinalStepUp(referenceId, transactionId, payload, acsUrl);
+                            }
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                }
+
+                function purchaseNewCC(threeDSRequestId){
+                    console.log("Initiating purchaseNewCC Step 5 - Frictionless");
+
+                    //Prepare Data
+                    const BodyData = {
+                        referenceOrderNumber: $('#order').val(),
+                        creditCard:{
+                            OwnerName: $('#cc-holder').val(),
+                            CreditCardNumber: $('#cc-number').val(),
+                            MonthExpirationDate: $('#cc-expiration').val().split('/')[0],
+                            YearExpirationDate: "20" + $('#cc-expiration').val().split('/')[1],
+                            Cvv: $('#cc-cvv').val(),
+                            BillingAddress: {
+                                Street: $('#cc-address').val(),
+                                city: $('#cc-city').val(),
+                                StateProvince: $('#cc-state').val(),
+                                CountryIso:'CL',
+                                postalCode: $('#cc-postcode').val()
+                            },
+                            cardBrand: getCCBrand($('#cc-number').val()),
+                            isPrimaryCard: false
+                        },
+                        purchaseDetails: {
+
+                            amount: $('#amount').val(),
+                            currencyCode: 'USD',
+                            billingProfileId: 378504, // Billing profile must be retrieved using API Method for Billing profiles using Marcaria UserID
+                            threeDSRequestId: threeDSRequestId
+                        },
+                        shouldSaveCard: $('#cc-save')[0].checked
+                    };
+                    console.log('BodyDataPaymentNewCC:', BodyData);
+
+
+                    //Step 5: Payment New CC
+                    $.ajax({
+                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/purchaseNewCC', 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', 
+                        },
+                        dataType: 'json',
+                        data: JSON.stringify(BodyData), // Stringify the data to send it as JSON
+                        success: function (response) {
+                            console.log('Success:', response);
+                            
+                            //Get AlpineJS objects
+                            const divcc = document.querySelectorAll('[x-ref^="credit-card"]');
+                            //Hide gif using AlpineJS components
+                            divcc[0]._x_dataStack[0].paymentProcess = false;
+
+                            divcc[0]._x_dataStack[0].success = true;
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                    
+                }
+
+                function proceedWithCardinalStepUp(referenceId, transactionId, payload, acsUrl){
+                    console.log("Initiating Step 3");
+                    
+
+
+                    //Prepare data for Step-up
+                    const BodyData = {
+                            referenceOrderNumber: $('#order').val(),
+                            stepUpUrl: acsUrl,
+                            referenceId: $('#order').val(),
+                            transactionId: transactionId,
+                            payload:payload
+                        };
+                    
+                    //Step 3 - Authentication
+                    $.ajax({
+                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step3/stepUp', 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', 
+                        },
+                        dataType: 'json',
+                        data: JSON.stringify(BodyData), // Stringify the data to send it as JSON
+                        success: function (response) {
+
+                            console.log('Success:', response);
+
+                            //Get AlpineJS objects
+                            const divcc2 = document.querySelectorAll('[x-ref^="credit-card"]');
+                            //Make visible the iframe for Step3
+                            //divcc2[0]._x_dataStack[0].step1 = false;
+                            //remove previous event listener
+                            window.removeEventListener('message',ddcvalidationListener);
+                            divcc2[0]._x_dataStack[0].step3 = true;
+                            
+
+                            console.log('Show iFrame to interact');
+                            var stepUpForm = $('#stepupForm');
+                            $('#JWT2').val(response.token);
+                            $('#MD2').val(response.md);
+                            //$('#MD2').val('0');
+                            stepUpForm.submit();
+                            var iframe = document.getElementById('stepupFrame');
+                            
+                            window.addEventListener('message',ddcStepUpListener);
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                            
+
+
+                }
+
+                function ddcStepUpListener(event) { 
+                    console.log("Message received from the child: " + event.data); // Message received from child			 
+                    if (event.data != "Error" && event.origin == "https://api.marcaria.com") { 
+                        //document.getElementById('tid').value = event.data;
+                        console.log('StepUpResponse:', event);
+                        var tId = event.data;
+
+                        proceedWithCardinalAuth(tId); 
+                    } 
+                } 
+
+                function proceedWithCardinalAuth(tId){
+                    console.log('Initiating Step 4 - Auth');
+                    //Hide Modal changing property
+                    var divModal = document.getElementById("iframeModal");
+                    divModal.style.display = "none";
+
+                    //Prepare data for Step 4 - LookupAuth Process
+                    const BodyData = {
+                            TId: tId 
+                        };
+                    
+                    //Step 4 - LookupAuth Process
+                    $.ajax({
+                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step4/lookupAuth', 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json', 
+                        },
+                        dataType: 'json',
+                        data: JSON.stringify(BodyData), // Stringify the data to send it as JSON
+                        success: function (response) {
+                            console.log('Success:', response);
+                            if(response.proceedWithPayment){
+                                var threeDSRequestId = response.threeDSRequestId;
+                                console.error('Validation OK');
+                                purchaseNewCC(threeDSRequestId);
+                            }
+                            else{
+                                console.error('Validation failed');
+                            }
+
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                
+                }
+
+
+                function GetUserIP(){
+                    var ret_ip;
+                    $.ajaxSetup({async: false});
+                    $.get('https://api.ipify.org/?format=json', function(r){ 
+                        ret_ip = r.ip; 
+                    });
+                    return ret_ip;
+                }
+
+                function getCCBrand(ccNumber){
+                    var brand = "VISA";
+                    if(ccNumber.slice(0,2) >= 50){
+                         brand = 'MASTERCARD';
+                    }
+                    else {
+
+                        brand = "VISA";
+                    }
+                    return brand;
+                }
+
+            </script>
 
 {% endblock %}

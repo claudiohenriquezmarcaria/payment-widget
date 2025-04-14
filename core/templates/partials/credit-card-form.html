@@ -10,12 +10,13 @@
                     id="cc-number"
                     required
                 /><br>
-                <span class="block text-sm font-medium text-gray-700">Expiry:</span><input
+                <span class="block text-sm font-medium text-gray-700">Expiry (mm/yy):</span><input
                     type="text"
                     min="5"
                     max="5"
                     class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     name="cc-expiration"
+                    id="cc-expiration"
                     required
                 /><br>
                 <span class="block text-sm font-medium text-gray-700">CVC:</span><input
@@ -23,7 +24,8 @@
                     min="5"
                     max="5"
                     class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    name="cc-cvc"
+                    name="cc-cvv"
+                    id="cc-cvv"
                     required
                 /><br>
                     <span class="block text-sm font-medium text-gray-700">Holder name:</span><input
@@ -32,7 +34,58 @@
                     max="30"
                     class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     name="cc-holder"
+                    id="cc-holder"
                     
+                /><br>
+                    <span class="block text-sm font-medium text-gray-700">Address:</span><input
+                    type="text"
+                    min="0"
+                    max="100"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-address"
+                    id="cc-address"
+                    
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">City:</span><input
+                    type="text"
+                    min="0"
+                    max="100"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-city"
+                    id="cc-city"
+                    
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">Country:</span><input
+                    type="text"
+                    min="0"
+                    max="100"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-country"
+                    id="cc-country"
+                    
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">Postal Code:</span><input
+                    type="text"
+                    min="0"
+                    max="100"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-postcode"
+                    id="cc-postcode"
+                    
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">State:</span><input
+                    type="text"
+                    min="0"
+                    max="100"
+                    class="mt-1 block  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    name="cc-state"
+                    id="cc-state"
+                    
+                /><br>
+                <span class="block text-sm font-medium text-gray-700">Save Credit Card:</span><input
+                    type="checkbox"
+                    name="cc-save"
+                    id="cc-save"
                 />
             </form>
         </div>
