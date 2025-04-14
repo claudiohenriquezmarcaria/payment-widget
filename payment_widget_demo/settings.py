@@ -49,7 +49,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'soccerates_demo.urls'
+ROOT_URLCONF = 'payment_widget_demo.urls'
 
 TEMPLATES = [
     {
@@ -67,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'soccerates_demo.wsgi.application'
+WSGI_APPLICATION = 'payment_widget_demo.wsgi.application'
 
 
 # Database
