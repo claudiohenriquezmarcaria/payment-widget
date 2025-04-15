@@ -67,7 +67,7 @@
 
                     
                     $.ajax({
-                        url: 'https://api-marcariacore-qa.marcaria.host/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step1/JWTInitialization',  
+                        url: '{{ Env }}'+'/api/v1.0/users/'+'{{ LoggedInUser.mid }}'+'/payments/3ds/step1/JWTInitialization',  
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json', 
@@ -154,7 +154,7 @@
 
                     //Step 2: Lookup request
                     $.ajax({
-                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step2/lookup', 
+                        url: '{{ Env }}'+'/api/v1.0/users/'+'{{ LoggedInUser.mid }}'+'/payments/3ds/step2/lookup', 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json', 
@@ -242,7 +242,7 @@
 
                     //Step 5: Payment New CC
                     $.ajax({
-                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/purchaseNewCC', 
+                        url: '{{ Env }}'+'/api/v1.0/users/'+'{{ LoggedInUser.mid }}'+'/payments/purchaseNewCC', 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json', 
@@ -283,7 +283,7 @@
                     
                     //Step 3 - Authentication
                     $.ajax({
-                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step3/stepUp', 
+                        url: '{{ Env }}'+'/api/v1.0/users/'+'{{ LoggedInUser.mid }}'+'/payments/3ds/step3/stepUp', 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json', 
@@ -342,12 +342,12 @@
 
                     //Prepare data for Step 4 - LookupAuth Process
                     const BodyData = {
-                            TId: tId 
+                            tId: tId 
                         };
                     
                     //Step 4 - LookupAuth Process
                     $.ajax({
-                        url: 'https://localhost:7292/api/v1.0/users/'+{{ LoggedInUser.mid }}+'/payments/3ds/step4/lookupAuth', 
+                        url: '{{ Env }}'+'/api/v1.0/users/'+'{{ LoggedInUser.mid }}'+'/payments/3ds/step4/lookupAuth', 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json', 

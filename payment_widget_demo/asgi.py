@@ -1,5 +1,5 @@
 """
-ASGI config for soccerates_demo project.
+ASGI config for Marcaria-payment-widget project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

@@ -13,7 +13,8 @@ def index(request):
     context = {
         'CreditCards': creditCards,
         'CreditCardsAPI': creditCardsAPI,
-        'LoggedInUser':user
+        'LoggedInUser':user,
+        'Env': 'https://api-marcariacore-qa.marcaria.host'
     }
     return render(request, 'index.html', context)
 
